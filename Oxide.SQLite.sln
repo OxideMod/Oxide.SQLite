@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0
 MinimumVisualStudioVersion = 15.0
-Project("{A368D19F-85B0-4AB4-9782-3FDEA33D33D1}") = "Oxide.SQLite", "Oxide.SQLite\Oxide.SQLite.csproj", "{C54EA613-C5FD-4ACD-8AC4-79063B08CF5A}"
+Project("{A368D19F-85B0-4AB4-9782-3FDEA33D33D1}") = "Oxide.SQLite", "src\Oxide.SQLite.csproj", "{C54EA613-C5FD-4ACD-8AC4-79063B08CF5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -2,7 +2,7 @@
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
-    <Version>2.0.0.0</Version>
+    <Version>2.0.0</Version>
     <AssemblyName>Oxide.SQLite</AssemblyName>
     <Authors>Oxide and Contributors</Authors>
     <Description>SQLite database support for the Oxide modding framework</Description>
@@ -20,8 +20,10 @@
     -->
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35' And '$(OS)' == 'Windows_NT'">C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
     <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35' And '$(OS)' == 'OSX'">/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/2.0-api</FrameworkPathOverride>
+    <ThisAssemblyNamespace>Oxide.Core.SQLite</ThisAssemblyNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="GitInfo" Version="2.0.*" />
     <PackageReference Include="Oxide.Core" Version="2.0.*" />
     <Reference Include="System.Data.SQLite">
       <HintPath>Dependencies\System.Data.SQLite.dll</HintPath>
@@ -34,7 +36,7 @@
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
     <ItemGroup>
       <ReferencePath Condition="'%(FileName)' == 'Oxide.References'">
-        <Aliases>Oxide</Aliases>
+        <Aliases>References</Aliases>
       </ReferencePath>
     </ItemGroup>
   </Target>

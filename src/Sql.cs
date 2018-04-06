@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -52,11 +53,13 @@ namespace Oxide.Ext.SQLite
         {
             // Already built?
             if (_sqlFinal != null)
+            {
                 return;
+            }
 
             // Build it
-            var sb = new StringBuilder();
-            var args = new List<object>();
+            StringBuilder sb = new StringBuilder();
+            List<object> args = new List<object>();
             Build(sb, args, null);
             _sqlFinal = sb.ToString();
             _argsFinal = args.ToArray();
@@ -65,9 +68,13 @@ namespace Oxide.Ext.SQLite
         public Sql Append(Sql sql)
         {
             if (_rhs != null)
+            {
                 _rhs.Append(sql);
+            }
             else
+            {
                 _rhs = sql;
+            }
 
             return this;
         }
@@ -84,7 +91,7 @@ namespace Oxide.Ext.SQLite
 
         private void Build(StringBuilder sb, List<object> args, Sql lhs)
         {
-            if (!String.IsNullOrEmpty(_sql))
+            if (!string.IsNullOrEmpty(_sql))
             {
                 // Add SQL to the string
                 if (sb.Length > 0)
@@ -92,19 +99,26 @@ namespace Oxide.Ext.SQLite
                     sb.Append("\n");
                 }
 
-                var sql = ProcessParams(_sql, _args, args);
+                string sql = ProcessParams(_sql, _args, args);
 
                 if (Is(lhs, "WHERE ") && Is(this, "WHERE "))
+                {
                     sql = "AND " + sql.Substring(6);
+                }
+
                 if (Is(lhs, "ORDER BY ") && Is(this, "ORDER BY "))
+                {
                     sql = ", " + sql.Substring(9);
+                }
 
                 sb.Append(sql);
             }
 
             // Now do rhs
             if (_rhs != null)
+            {
                 _rhs.Build(sb, args, this);
+            }
         }
 
         public Sql Where(string sql, params object[] args)
@@ -114,22 +128,22 @@ namespace Oxide.Ext.SQLite
 
         public Sql OrderBy(params object[] columns)
         {
-            return Append(new Sql("ORDER BY " + String.Join(", ", (from x in columns select x.ToString()).ToArray())));
+            return Append(new Sql("ORDER BY " + string.Join(", ", (from x in columns select x.ToString()).ToArray())));
         }
 
         public Sql Select(params object[] columns)
         {
-            return Append(new Sql("SELECT " + String.Join(", ", (from x in columns select x.ToString()).ToArray())));
+            return Append(new Sql("SELECT " + string.Join(", ", (from x in columns select x.ToString()).ToArray())));
         }
 
         public Sql From(params object[] tables)
         {
-            return Append(new Sql("FROM " + String.Join(", ", (from x in tables select x.ToString()).ToArray())));
+            return Append(new Sql("FROM " + string.Join(", ", (from x in tables select x.ToString()).ToArray())));
         }
 
         public Sql GroupBy(params object[] columns)
         {
-            return Append(new Sql("GROUP BY " + String.Join(", ", (from x in columns select x.ToString()).ToArray())));
+            return Append(new Sql("GROUP BY " + string.Join(", ", (from x in columns select x.ToString()).ToArray())));
         }
 
         private SqlJoinClause Join(string joinType, string table)
@@ -151,38 +165,46 @@ namespace Oxide.Ext.SQLite
         {
             return RxParams.Replace(sql, m =>
             {
-                var param = m.Value.Substring(1);
-
+                string param = m.Value.Substring(1);
                 object argVal;
 
                 int paramIndex;
                 if (int.TryParse(param, out paramIndex))
                 {
                     if (paramIndex < 0 || paramIndex >= argsSrc.Length)
-                        throw new ArgumentOutOfRangeException(string.Format("Parameter '@{0}' specified but only {1} parameters supplied (in `{2}`)", paramIndex, argsSrc.Length, sql));
+                    {
+                        throw new ArgumentOutOfRangeException($"Parameter '@{paramIndex}' specified but only {argsSrc.Length} parameters supplied (in `{sql}`)");
+                    }
+
                     argVal = argsSrc[paramIndex];
                 }
                 else
                 {
-                    var found = false;
+                    bool found = false;
                     argVal = null;
-                    foreach (var o in argsSrc)
+                    foreach (object o in argsSrc)
                     {
-                        var pi = o.GetType().GetProperty(param);
-                        if (pi == null) continue;
+                        PropertyInfo pi = o.GetType().GetProperty(param);
+                        if (pi == null)
+                        {
+                            continue;
+                        }
+
                         argVal = pi.GetValue(o, null);
                         found = true;
                         break;
                     }
 
                     if (!found)
-                        throw new ArgumentException(string.Format("Parameter '@{0}' specified but none of the passed arguments have a property with this name (in '{1}')", param, sql));
+                    {
+                        throw new ArgumentException($"Parameter '@{param}' specified but none of the passed arguments have a property with this name (in '{sql}')");
+                    }
                 }
 
-                if ((argVal as IEnumerable) != null && (argVal as string) == null && (argVal as byte[]) == null)
+                if (argVal as IEnumerable != null && argVal as string == null && argVal as byte[] == null)
                 {
-                    var sb = new StringBuilder();
-                    foreach (var i in argVal as IEnumerable)
+                    StringBuilder sb = new StringBuilder();
+                    foreach (object i in argVal as IEnumerable)
                     {
                         sb.Append((sb.Length == 0 ? "@" : ",@") + argsDest.Count.ToString());
                         argsDest.Add(i);
@@ -191,13 +213,12 @@ namespace Oxide.Ext.SQLite
                 }
                 argsDest.Add(argVal);
                 return "@" + (argsDest.Count - 1).ToString();
-            }
-                );
+            });
         }
 
         public static void AddParams(IDbCommand cmd, object[] items, string parameterPrefix)
         {
-            foreach (var item in items)
+            foreach (object item in items)
             {
                 AddParam(cmd, item, "@");
             }
@@ -205,23 +226,23 @@ namespace Oxide.Ext.SQLite
 
         public static void AddParam(IDbCommand cmd, object item, string parameterPrefix)
         {
-            var idbParam = item as IDbDataParameter;
+            IDbDataParameter idbParam = item as IDbDataParameter;
             if (idbParam != null)
             {
-                idbParam.ParameterName = string.Format("{0}{1}", parameterPrefix, cmd.Parameters.Count);
+                idbParam.ParameterName = $"{parameterPrefix}{cmd.Parameters.Count}";
                 cmd.Parameters.Add(idbParam);
                 return;
             }
 
-            var p = cmd.CreateParameter();
-            p.ParameterName = string.Format("{0}{1}", parameterPrefix, cmd.Parameters.Count);
+            IDbDataParameter p = cmd.CreateParameter();
+            p.ParameterName = $"{parameterPrefix}{cmd.Parameters.Count}";
             if (item == null)
             {
                 p.Value = DBNull.Value;
             }
             else
             {
-                var t = item.GetType();
+                Type t = item.GetType();
                 if (t.IsEnum)
                 {
                     p.Value = (int)item;
@@ -239,7 +260,7 @@ namespace Oxide.Ext.SQLite
                 }
                 else if (t == typeof(bool))
                 {
-                    p.Value = ((bool)item) ? 1 : 0;
+                    p.Value = (bool)item ? 1 : 0;
                 }
                 else
                 {

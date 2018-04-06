@@ -36,8 +36,6 @@ namespace Oxide.Core.SQLite
         /// </summary>
         public override VersionNumber Version => AssemblyVersion;
 
-        private Libraries.SQLite sqlite;
-
         /// <summary>
         /// Initializes a new instance of the MySqlExtension class
         /// </summary>
@@ -45,9 +43,12 @@ namespace Oxide.Core.SQLite
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                var extDir = Interface.Oxide.ExtensionDirectory;
-                var configPath = Path.Combine(extDir, "System.Data.SQLite.dll.config");
-                if (File.Exists(configPath) && !(new[] { "target=\"x64", "target=\"./x64" }.Any(File.ReadAllText(configPath).Contains))) return;
+                string extDir = Interface.Oxide.ExtensionDirectory;
+                string configPath = Path.Combine(extDir, "System.Data.SQLite.dll.config");
+                if (File.Exists(configPath) && !new[] { "target=\"x64", "target=\"./x64" }.Any(File.ReadAllText(configPath).Contains))
+                {
+                    return;
+                }
 
                 File.WriteAllText(configPath, $"<configuration>\n<dllmap dll=\"sqlite3\" target=\"{extDir}/x86/libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86\" />\n" +
                     $"<dllmap dll=\"sqlite3\" target=\"{extDir}/x64/libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86-64\" />\n</configuration>");
@@ -57,7 +58,7 @@ namespace Oxide.Core.SQLite
         /// <summary>
         /// Loads this extension
         /// </summary>
-        public override void Load() => Manager.RegisterLibrary("SQLite", sqlite = new Libraries.SQLite());
+        public override void Load() => Manager.RegisterLibrary("SQLite", new Libraries.SQLite());
 
         /// <summary>
         /// Loads plugin watchers used by this extension
