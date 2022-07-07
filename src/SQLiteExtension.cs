@@ -1,7 +1,6 @@
 ﻿using Oxide.Core.Extensions;
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace Oxide.Core.SQLite
@@ -45,20 +44,25 @@ namespace Oxide.Core.SQLite
             {
                 string extDir = Interface.Oxide.ExtensionDirectory;
                 string configPath = Path.Combine(extDir, "System.Data.SQLite.dll.config");
-                if (File.Exists(configPath) && !new[] { "target=\"x64", "target=\"./x64" }.Any(File.ReadAllText(configPath).Contains))
-                {
-                    return;
-                }
-
-                File.WriteAllText(configPath, $"<configuration>\n<dllmap dll=\"sqlite3\" target=\"{extDir}/x86/libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86\" />\n" +
-                    $"<dllmap dll=\"sqlite3\" target=\"{extDir}/x64/libsqlite3.so\" os=\"!windows,osx\" cpu=\"x86-64\" />\n</configuration>");
+                File.WriteAllText(configPath, $"<configuration>\n<dllmap dll=\"SQLite.Interop\" target=\"{extDir}/x86/libSQLite.Interop.so\" os=\"!windows,osx\" cpu=\"x86\" />\n" +
+                    $"<dllmap dll=\"SQLite.Interop\" target=\"{extDir}/x64/libSQLite.Interop.so\" os=\"!windows,osx\" cpu=\"x86-64\" />\n</configuration>");
             }
         }
 
         /// <summary>
         /// Loads this extension
         /// </summary>
-        public override void Load() => Manager.RegisterLibrary("SQLite", new Libraries.SQLite());
+        public override void Load()
+        {
+            Manager.RegisterLibrary("SQLite", new Libraries.SQLite());
+
+            Cleanup.Add("RustDedicated_Data\\Managed\\x64\\libsqlite3");
+            Cleanup.Add("RustDedicated_Data\\Managed\\x64\\libsqlite3.so");
+            Cleanup.Add("RustDedicated_Data\\Managed\\x64\\sqlite3.dll");
+            Cleanup.Add("RustDedicated_Data\\Managed\\x86\\libsqlite3");
+            Cleanup.Add("RustDedicated_Data\\Managed\\x86\\libsqlite3.so");
+            Cleanup.Add("RustDedicated_Data\\Managed\\x86\\sqlite3.dll");
+        }
 
         /// <summary>
         /// Loads plugin watchers used by this extension
@@ -73,6 +77,11 @@ namespace Oxide.Core.SQLite
         /// </summary>
         public override void OnModLoad()
         {
+            AssemblyName assemblyName = AssemblyName.GetAssemblyName(Path.Combine(Interface.Oxide.ExtensionDirectory, "System.Data.SQLite.dll"));
+            if (assemblyName != null)
+            {
+                Interface.Oxide.LogInfo($"SQLite connector version: {assemblyName.Version}");
+            }
         }
     }
 }

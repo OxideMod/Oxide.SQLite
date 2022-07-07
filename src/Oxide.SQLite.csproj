@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <Import Project="..\netfx.props" />
@@ -12,19 +12,15 @@
     <PackageIconUrl>icon.png</PackageIconUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
-    <TargetFrameworks>net35;net40;net45;net46;net48;netstandard2.0;netstandard2.1</TargetFrameworks>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <TargetFrameworks>net35;net40;net452;net462;net48</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Oxide.Core" Version="2.0.*" />
-    <Reference Include="System.Data.SQLite">
-      <HintPath>Dependencies\System.Data.SQLite.dll</HintPath>
-    </Reference>
-    <Content Include="Dependencies\*.*" PackagePath="lib\any" />
-    <Content Include="Dependencies\x64\*.*" PackagePath="lib\any\x64" />
-    <Content Include="Dependencies\x86\*.*" PackagePath="lib\any\x86" />
-    <None Include="..\resources\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\dependencies\$(TargetFramework)\*.*" PackagePath="lib\$(TargetFramework)" Pack="true" />
+    <None Include="..\dependencies\any\**\*.*" PackagePath="lib\any" Pack="true" />
+    <None Include="..\resources\icon.png" PackagePath="\" Pack="true" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
