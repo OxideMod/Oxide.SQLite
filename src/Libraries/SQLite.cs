@@ -1,6 +1,3 @@
-﻿using Oxide.Core.Database;
-using Oxide.Core.Libraries;
-using Oxide.Core.Plugins;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -8,6 +5,9 @@ using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Oxide.Core.Database;
+using Oxide.Core.Libraries;
+using Oxide.Core.Plugins;
 
 namespace Oxide.Core.SQLite.Libraries
 {

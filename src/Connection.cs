@@ -1,4 +1,4 @@
-﻿using Oxide.Core.Plugins;
+using Oxide.Core.Plugins;
 using System.Data.SQLite;
 #if NET35
 using System.Security.Permissions;

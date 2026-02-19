@@ -1,8 +1,8 @@
-﻿using Oxide.Core.Extensions;
 using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Oxide.Core.Extensions;
 
 namespace Oxide.Core.SQLite
 {
